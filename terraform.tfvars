@@ -1,0 +1,11 @@
+# aws_region =
+bastion_public_key = "<BASTION PUBLIC KEY>"
+private_public_key = "<YOUR PUBLIC KEY FOR PRIVATE INSTANCES>"
+# bastion_prefix =
+# app_instance_type =
+# vpc_name =
+# vpc_cidr =
+# aws_azs =
+# private_subnets =
+# public_subnets =
+# project_name =
