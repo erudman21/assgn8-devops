@@ -1,4 +1,4 @@
-# assgn8-devops
+# Assignment 8
 # Overview
 This project creates a custom AWS AMI with Packer in ```my_ami.pkr.hcl``` that includes:
 - Amazon Linux
