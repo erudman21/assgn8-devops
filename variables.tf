@@ -53,7 +53,7 @@ variable "private_subnets" {
 variable "public_subnets" {
   description = "List of internal CIDR ranges for the public subnet"
   type        = list(string)
-  default     = ["10.0.101.0/24", "10.0.102.0/24", "10.0.103.0/24"]
+  default     = ["10.0.101.0/24"]
 }
 
 variable "project_name" {
