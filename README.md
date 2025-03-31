@@ -73,7 +73,14 @@ And Ansible files:
    
    Along with the appropriate VPC, security groups, etc... (with the appropriate ingress rules):
    ![image](https://github.com/user-attachments/assets/d8faaa83-e16a-49b4-90a1-8edebab90365)
-8. Setup controller:
+8. Make sure your SSH keys are added to ssh-agent:
+   - Add your ssh keys to ssh-agent
+      ```
+      eval $(ssh-agent)
+      ssh-add PATH_TO_THE_BASTION_HOST_PRIVATE_KEY
+      ssh-add PATH_TO_THE_PRIVATE_EC2S_PRIVATE_KEY
+      ```
+9. Setup controller:
    ```
    chmod +x setup_controller.sh
    ./setup_controller.sh
@@ -84,7 +91,7 @@ And Ansible files:
    
    ![Screenshot 2025-03-30 195437](https://github.com/user-attachments/assets/e1a3cda5-b8b2-48df-b6fc-9b43125a4b81)
 
-9. Run the output commands from the script
+10. Run the output commands from the script
 
    After you run the playbook it should:
    - Update and upgrade the packages (if needed)
