@@ -37,7 +37,25 @@ output "bastion_public_ip" {
   value       = aws_instance.bastion.public_ip
 }
 
-output "app_server_private_ips" {
+output "ansible_controller_private_ip" {
+  description = "The private IP of the Ansible controller"
+  value       = aws_instance.ansible_controller.private_ip
+}
+
+output "amazon_linux_private_ips" {
+  description = "Private IP addresses of the Amazon Linux servers"
+  value       = aws_instance.amazon_linux_servers[*].private_ip
+}
+
+output "ubuntu_private_ips" {
+  description = "Private IP addresses of the Ubuntu servers"
+  value       = aws_instance.ubuntu_servers[*].private_ip
+}
+
+output "server_ips" {
   description = "Private IP addresses of the application servers"
-  value       = aws_instance.app_servers[*].private_ip
+  value = {
+    amazon_linux = aws_instance.amazon_linux_servers[*].private_ip
+    ubuntu = aws_instance.ubuntu_servers[*].private_ip
+  }
 }

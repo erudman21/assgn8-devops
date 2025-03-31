@@ -1,0 +1,101 @@
+---
+- name: EC2 Management Tasks
+  hosts: tag_Role_ManagedNode
+  become: yes
+  gather_facts: yes
+
+  tasks:
+    - name: Update package cache (Amazon Linux)
+      dnf:
+        name: '*'
+        state: latest
+        update_cache: yes
+      when: ansible_os_family == "RedHat"
+
+    - name: Update package cache (Ubuntu)
+      apt:
+        update_cache: yes
+      when: ansible_os_family == "Debian"
+
+    - name: Upgrade packages (Ubuntu)
+      apt:
+        upgrade: dist
+      when: ansible_os_family == "Debian"
+
+    - name: Check if Docker is installed
+      command: which docker
+      register: docker_check
+      ignore_errors: yes
+      changed_when: false
+
+    - name: Install Docker (Amazon Linux) if not installed
+      block:
+        - name: Install Docker on Amazon Linux
+          yum:
+            name: docker
+            state: latest
+        - name: Start Docker service on Amazon Linux
+          service:
+            name: docker
+            state: started
+            enabled: yes
+      when: 
+        - ansible_os_family == "RedHat"
+        - docker_check.rc != 0
+
+    - name: Install Docker (Ubuntu) if not installed
+      block:
+        - name: Install required packages for Docker
+          apt:
+            name:
+              - apt-transport-https
+              - ca-certificates
+              - curl
+              - gnupg
+              - lsb-release
+            state: present
+        
+        - name: Add Docker GPG key
+          apt_key:
+            url: https://download.docker.com/linux/ubuntu/gpg
+            state: present
+        
+        - name: Add Docker repository
+          apt_repository:
+            repo: deb [arch=amd64] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable
+            state: present
+        
+        - name: Install Docker
+          apt:
+            name: docker-ce
+            state: latest
+            update_cache: yes
+        
+        - name: Start Docker service
+          service:
+            name: docker
+            state: started
+            enabled: yes
+      when: 
+        - ansible_os_family == "Debian"
+        - docker_check.rc != 0
+
+    - name: Check Docker version
+      command: docker --version
+      register: docker_version
+      changed_when: false
+      no_log: true
+
+    - name: Report Docker version
+      debug:
+        msg: "Docker version: {{ docker_version.stdout }}"
+
+    - name: Get disk usage
+      command: df -h
+      register: disk_usage
+      changed_when: false
+      no_log: true
+
+    - name: Report disk usage
+      debug:
+        msg: "{{ disk_usage.stdout_lines }}"

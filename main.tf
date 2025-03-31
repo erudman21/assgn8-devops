@@ -10,13 +10,33 @@ locals {
   public_ip = "${chomp(data.http.public_ip.response_body)}/32"
 }
 
-data "aws_ami" "custom_ami" {
+data "aws_ami" "amazon_linux_ami" {
   most_recent = true
   owners      = ["self"]
 
   filter {
     name   = "name"
-    values = ["assgn8-*"]
+    values = ["assgn8-al-*"]
+  }
+}
+
+data "aws_ami" "ubuntu_ami" {
+  most_recent = true
+  owners      = ["self"]
+
+  filter {
+    name   = "name"
+    values = ["assgn8-ubuntu-20*"]
+  }
+}
+
+data "aws_ami" "ubuntu_ansible" {
+  most_recent = true
+  owners      = ["self"]
+
+  filter {
+    name   = "name"
+    values = ["assgn8-ubuntu-ansible-*"]
   }
 }
 
@@ -59,20 +79,58 @@ module "private_sg" {
       source_security_group_id = module.bastion_sg.security_group_id
     }
   ]
+
+  ingress_with_self = [
+    {
+      rule = "all-all"
+    }
+  ]
   
   egress_rules = ["all-all"]
 }
 
-resource "aws_instance" "app_servers" {
-  count                  = 6
-  ami                    = data.aws_ami.custom_ami.id
+resource "aws_instance" "amazon_linux_servers" {
+  count                  = 3
+  ami                    = data.aws_ami.amazon_linux_ami.id
   instance_type          = var.app_instance_type
   vpc_security_group_ids = [module.private_sg.security_group_id]
   subnet_id              = module.vpc.private_subnets[count.index % length(module.vpc.private_subnets)]
   key_name               = aws_key_pair.private-key.key_name
   
   tags = {
-    Name        = "${var.project_name}-app-server-${count.index + 1}"
+    Name        = "${var.project_name}-al-app-server-${count.index + 1}"
+    Terraform   = "true"
+    OS          = "amazon"
+    Role        = "ManagedNode"
+  }
+}
+
+resource "aws_instance" "ubuntu_servers" {
+  count = 3
+
+  ami                    = data.aws_ami.ubuntu_ami.id
+  instance_type          = var.app_instance_type
+  vpc_security_group_ids = [module.private_sg.security_group_id]
+  subnet_id = module.vpc.private_subnets[count.index % length(module.vpc.private_subnets)]
+  key_name  = aws_key_pair.private-key.key_name
+
+  tags = {
+    Name        = "${var.project_name}-ubuntu-app-server-${count.index + 1}"
+    Terraform   = "true"
+    OS          = "ubuntu"
+    Role        = "ManagedNode"
+  }
+}
+
+resource "aws_instance" "ansible_controller" {
+  ami                    = data.aws_ami.ubuntu_ansible.id
+  instance_type          = var.app_instance_type
+  vpc_security_group_ids = [module.private_sg.security_group_id]
+  subnet_id              = module.vpc.private_subnets[0]
+  key_name               = aws_key_pair.private-key.key_name
+  
+  tags = {
+    Name        = "${var.project_name}-ansible-controller"
     Terraform   = "true"
   }
 }
