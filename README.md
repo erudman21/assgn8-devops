@@ -74,7 +74,6 @@ And Ansible files:
    Along with the appropriate VPC, security groups, etc... (with the appropriate ingress rules):
    ![image](https://github.com/user-attachments/assets/d8faaa83-e16a-49b4-90a1-8edebab90365)
 8. Make sure your SSH keys are added to ssh-agent:
-   - Add your ssh keys to ssh-agent
       ```
       eval $(ssh-agent)
       ssh-add PATH_TO_THE_BASTION_HOST_PRIVATE_KEY
